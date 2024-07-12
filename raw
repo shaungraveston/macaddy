@@ -1,0 +1,67 @@
+from netmiko import ConnectHandler
+
+# List of switches with credentials (replace with your actual credentials)
+switches = [
+    {'device_type': 'cisco_ios', 'host': 'X.cpe.mgmt.nz', 'username': 'X', 'password': 'X'},
+    {'device_type': 'cisco_ios', 'host': 'X.cpe.mgmt.nz', 'username': 'X', 'password': 'X'},
+	{'device_type': 'cisco_ios', 'host': 'X.cpe.mgmt.nz', 'username': 'X', 'password': 'X'},
+    {'device_type': 'cisco_ios', 'host': 'X.cpe.mgmt.nz', 'username': 'X', 'password': 'X'},
+	{'device_type': 'cisco_ios', 'host': 'X.cpe.mgmt.nz', 'username': 'X', 'password': 'X'},
+	{'device_type': 'cisco_ios', 'host': 'X.cpe.mgmt.nz', 'username': 'X', 'password': 'X'}
+    # Add more switches as needed
+]
+
+# List of MAC addresses in lowercase Cisco format
+mac_addresses = [
+    '30cb.c763.0f6f', '30cb.c763.1026', '30cb.c763.0f93', '30cb.c763.0ea6',
+    '30cb.c763.0f80', '30cb.c763.0f6c', '30cb.c763.0f6d', '30cb.c763.0f92',
+    '30cb.c762.ce4a', '30cb.c763.0f7d', '30cb.c763.0f78', 'fc11.65b6.c25c',
+    'fc11.65b6.c1a4', 'fc11.65b6.c22c', 'fc11.65b6.bbd2', 'fc11.65b6.c2f6',
+    'fc11.65bd.4a83', 'fc11.65bd.4d11', 'fc11.65bd.4a8d', 'fc11.65bd.49cd',
+    '30cb.c763.0e70', '30cb.c763.0e8b', '30cb.c763.0e6a', '30cb.c763.0f43',
+    '30cb.c762.4df1', '30cb.c763.0f18', '30cb.c763.0fea', '30cb.c763.102c',
+    '30cb.c763.0ffa', '30cb.c763.0f72', '30cb.c763.0ef5', '30cb.c763.0f9a',
+    '30cb.c763.0f74', '30cb.c763.1020', '30cb.c763.100b', '30cb.c763.0f63',
+    '30cb.c763.0fab', '30cb.c763.0f46', '30cb.c762.cf7d', '30cb.c763.100a'
+]
+
+# Function to find the port for each MAC address on each switch
+def find_ports(switches, mac_addresses):
+    for switch in switches:
+        host = switch['host']
+        username = switch['username']
+        password = switch['password']
+        
+        print(f"\nConnecting to switch {host}...\n")
+        
+        try:
+            # Establish SSH connection
+            net_connect = ConnectHandler(**switch)
+            
+            for mac in mac_addresses:
+                command = f"show mac address-table address {mac}"
+                output = net_connect.send_command(command)
+                
+                # Parse output to find the port
+                found = False
+                for line in output.splitlines():
+                    if mac in line:
+                        if host == 'LAND-S022-SW06.cpe.mgmt.nz' and 'Gi1/0/46' in line:
+                            print(f"{mac} found on switch {host}: Result filtered due to 'Gi1/0/46' in output for this switch")
+                        elif 'Gi1/0/1' not in line:  # Check if 'Gi1/0/1' is not in the line
+                            print(f"{mac} found on switch {host}: {line.strip()}")
+                        else:
+                            print(f"{mac} found on switch {host}: Result filtered due to 'Gi1/0/1' in output")
+                        found = True
+                        break
+                if not found:
+                    print(f"{mac} not found on switch {host}")
+            
+            net_connect.disconnect()
+
+        except Exception as e:
+            print(f"Error connecting to {host}: {e}")
+
+# Run the script
+if __name__ == "__main__":
+    find_ports(switches, mac_addresses)
