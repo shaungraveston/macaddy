@@ -46,7 +46,7 @@ def find_ports(switches, mac_addresses):
                 found = False
                 for line in output.splitlines():
                     if mac in line:
-                        if host == 'LAND-S022-SW06.cpe.mgmt.nz' and 'Gi1/0/46' in line:
+                        if host == X.cpe.mgmt.nz' and 'Gi1/0/46' in line:
                             print(f"{mac} found on switch {host}: Result filtered due to 'Gi1/0/46' in output for this switch")
                         elif 'Gi1/0/1' not in line:  # Check if 'Gi1/0/1' is not in the line
                             print(f"{mac} found on switch {host}: {line.strip()}")
